@@ -1,1 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS AI — Интеллектуальный помощник</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#0b0d12;color:#f4f5f7;
+ font-family:Arial,sans-serif;height:100vh;display:flex;
+}
+.sidebar{
+ width:260px;background:#11141b;padding:20px;
+ display:flex;flex-direction:column;border-right:1px solid #252a35;
+}
+.logo{font-size:25px;font-weight:bold;margin-bottom:30px}
+.logo span{color:#8b7cff}
+.new-chat{
+ background:#202431;color:white;border:1px solid #343b4b;
+ padding:13px;border-radius:10px;cursor:pointer;text-align:left;
+}
+.sidebar p{color:#8e96a8;font-size:13px;margin-top:30px}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+header{
+ padding:18px 25px;border-bottom:1px solid #252a35;
+ font-size:17px;font-weight:bold;
+}
+header span{color:#8b7cff}
+.chat{
+ flex:1;overflow-y:auto;padding:25px;
+ display:flex;flex-direction:column;gap:20px;
+}
+.welcome{text-align:center;margin:auto;max-width:600px}
+.welcome h1{font-size:38px}
+.welcome p{color:#9ba3b5}
+.message{
+ max-width:800px;width:fit-content;padding:15px 18px;
+ border-radius:15px;line-height:1.6;white-space:pre-wrap;
+ overflow-wrap:anywhere;
+}
+.user{background:#292d3c;align-self:flex-end}
+.bot{background:#171c27;align-self:flex-start}
+.bottom{padding:15px 20px 25px}
+.input-area{
+ max-width:850px;margin:auto;display:flex;gap:10px;
+ background:#171c27;border:1px solid #343b4b;
+ border-radius:15px;padding:10px;
+}
+input{
+ flex:1;min-width:0;background:transparent;border:0;
+ outline:none;color:white;font-size:16px;padding:10px;
+}
+.send{
+ background:#7564ed;border:0;color:white;
+ border-radius:10px;padding:12px 20px;cursor:pointer;
+}
+.send:disabled{opacity:.5}
+.note{text-align:center;color:#727b8c;font-size:11px;margin-top:12px}
+max-width:650px{
+ .sidebar{width:65px;padding:12px}
+ .logo{font-size:13px;writing-mode:vertical-rl}
+ .new-chat{font-size:0;text-align:center;padding:12px}
+ .sidebar p{display:none}
+ .chat{padding:15px}
+ .welcome h1{font-size:28px}
+ header{padding:16px}
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+ <div class="logo">NEXUS <span>AI</span></div>
+ <button class="new-chat" onclick="newChat()">＋ Новый чат</button>
+ <p>ТВОЙ ИНТЕЛЛЕКТУАЛЬНЫЙ ПОМОЩНИК</p>
+</aside>
 
+<main class="main">
+ <header>NEXUS <span>AI</span></header>
+ <section class="chat" id="chat">
+  <div class="welcome" id="welcome">
+   <h1>Привет! 👋</h1>
+   <p>Я NEXUS AI. Чем могу помочь сегодня?</p>
+  </div>
+ </section>
+
+ <div class="bottom">
+  <div class="input-area">
+   <input id="message" placeholder="Напиши сообщение..."
+    autocomplete="off">
+   <button class="send" id="send" onclick="sendMessage()">➤</button>
+  </div>
+  <div class="note">NEXUS AI может допускать ошибки. Проверяй важную информацию.</div>
+ </div>
+</main>
+
+<script>
+const chat=document.getElementById("chat");
+const input=document.getElementById("message");
+const send=document.getElementById("send");
+let history=[];
+
+function addMessage(text,type){
+ const div=document.createElement("div");
+ div.className="message "+type;
+ div.textContent=text;
+ chat.appendChild(div);
+ chat.scrollTop=chat.scrollHeight;
+}
+
+function newChat(){
+ history=[];
+ chat.innerHTML='<div class="welcome" id="welcome"><h1>Привет! 👋</h1><p>Я NEXUS AI. Чем могу помочь сегодня?</p></div>';
+}
+
+async function sendMessage(){
+ const text=input.value.trim();
+ if(!text||send.disabled)return;
+
+ const welcome=document.getElementById("welcome");
+ if(welcome)welcome.remove();
+
+ input.value="";
+ addMessage(text,"user");
+ history.push({role:"user",content:text});
+ send.disabled=true;
+
+ const waiting=document.createElement("div");
+ waiting.className="message bot";
+ waiting.textContent="NEXUS AI думает...";
+ chat.appendChild(waiting);
+
+ try{
+  const response=await fetch("/api/chat",{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({messages:history})
+  });
+
+  const data=await
+response.json();
+  waiting.remove();
+
+  if(!response.ok)throw new Error(data.error||"Ошибка сервера");
+
+  const answer=data.reply||"Пустой ответ";
+  addMessage(answer,"bot");
+  history.push({role:"assistant",content:answer});
+
+ }catch(error){
+  waiting.remove();
+  addMessage("Не удалось получить ответ: "+error.message,"bot");
+  history.pop();
+ }finally{
+  send.disabled=false;
+  input.focus();
+ }
+}
+
+input.addEventListener("keydown",e=>{
+ if(e.key==="Enter")sendMessage();
+});
+</script>
+</body>
+</html>
