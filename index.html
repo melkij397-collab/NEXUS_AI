@@ -27,7 +27,7 @@ button:disabled{opacity:.5}
 </header>
 
 <main id="chat">
-<div class="msg ai">Привет! Я NEXUS AI. Напиши мне что-нибудь — попробуем подключиться к нейросети.</div>
+<div class="msg ai">Привет! Я NEXUS AI. Чем могу помочь?</div>
 </main>
 
 <div id="controls">
@@ -42,53 +42,61 @@ const button = document.getElementById("send");
 let history = [];
 
 function addMessage(text, type) {
-  const div = document.createElement("div");
-  div.className = "msg " + type;
-  div.textContent = text;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-  return div;
+    const div = document.createElement("div");
+    div.className = "msg " + type;
+    div.textContent = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return div;
 }
 
 async function sendMessage() {
-  const text = input.value.trim();
-  if (!text || button.disabled) return;
+    const text = input.value.trim();
+    if (!text || button.disabled) return;
 
-  input.value = "";
-  addMessage(text, "user");
-  history.push({role: "user", content: text});
+    input.value = "";
+    addMessage(text, "user");
+    history.push({role: "user", content: text});
 
-  button.disabled = true;
-  const waiting = addMessage("NEXUS AI думает...", "ai");
+    button.disabled = true;
+    const waiting = addMessage("NEXUS AI думает...", "ai");
 
-  try {
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({messages: history})
-    });
+    try {
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({messages: history})
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.details || data.error || "Ошибка сервера");
+        if (!response.ok) {
+            throw new Error(data.details || data.error || "Ошибка сервера");
+        }
+
+        const answer = data.reply || data.answer;
+
+        if (typeof answer !== "string" || !answer.trim()) {
+            throw new Error("Сервер вернул пустой ответ");
+        }
+
+        waiting.textContent = answer;
+        history.push({role: "assistant", content: answer});
+
+    } catch (error) {
+        waiting.textContent = "Ошибка: " + error.message;
+        history.pop();
+    } finally {
+        button.disabled = false;
+        input.focus();
+        chat.scrollTop = chat.scrollHeight;
     }
-
-    waiting.textContent = data.answer;
-    history.push({role: "assistant", content: data.answer});
-  } catch (error) {
-    waiting.textContent = "Ошибка: " + error.message;
-    history.pop();
-  } finally {
-    button.disabled = false;
-    input.focus();
-    chat.scrollTop = chat.scrollHeight;
-  }
 }
 
 button.addEventListener("click", sendMessage);
+
 input.addEventListener("keydown", event => {
-  if (event.key === "Enter") sendMessage();
+    if (event.key === "Enter") sendMessage();
 });
 </script>
 </body>
