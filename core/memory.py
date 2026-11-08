@@ -2,26 +2,28 @@ import json
 import os
 from datetime import datetime
 
+MEMORY_FILE = "data/memory.json"
+
 
 class NexusMemory:
     def __init__(self):
         os.makedirs("data", exist_ok=True)
-        self.file = "data/memory.json"
 
-        if not os.path.exists(self.file):
+        if not os.path.exists(MEMORY_FILE):
             self.save([])
 
     def load(self):
         try:
-            with open(self.file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (OSError, json.JSONDecodeError):
+            with open(MEMORY_FILE, "r", encoding="utf-8") as file:
+                return json.load(file)
+        except (json.JSONDecodeError, OSError):
             return []
 
     def save(self, memory):
         os.makedirs("data", exist_ok=True)
-        with open(self.file, "w", encoding="utf-8") as f:
-            json.dump(memory, f, ensure_ascii=False, indent=4)
+
+        with open(MEMORY_FILE, "w", encoding="utf-8") as file:
+            json.dump(memory, file, ensure_ascii=False, indent=4)
 
     def add(self, role, content):
         memory = self.load()

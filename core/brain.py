@@ -1,23 +1,53 @@
 from core.memory import NexusMemory
 from core.router import NexusRouter
+from modules.llm import NexusLLM
+from modules.web import NexusWeb
 
 
 class NexusBrain:
     def __init__(self):
+        self.name = "NEXUS AI"
+        self.version = "4.0.0"
+
         self.memory = NexusMemory()
         self.router = NexusRouter()
-        self.name = "NEXUS AI"
-        self.version = "1.0.0"
+        self.llm = NexusLLM()
+        self.web = NexusWeb()
 
     def process(self, message):
         if not isinstance(message, str) or not message.strip():
             raise ValueError("Пустое сообщение")
 
         message = message.strip()
+        history = self.memory.get_history(limit=10)
+
+        context = "\n".join(
+            f"{item['role']}: {item['content']}"
+            for item in history
+        )
+
         category = self.router.route(message)
+        search_data = self.web.search(message)
+
+        search_context = ""
+
+        if isinstance(search_data, dict) and search_data.get("status") == "success":
+            search_context = "\n".join(
+                f"{item['title']}: {item['text']}"
+                for item in search_data.get("results", [])
+            )
+
+        full_context = (
+            f"История диалога:\n{context}\n\n"
+            f"Результаты поиска:\n{search_context}"
+        )
+
+        response = self.llm.generate(
+            message,
+            context=full_context
+        )
 
         self.memory.add("user", message)
-        response = self.generate_response(message, category)
         self.memory.add("assistant", response)
 
         return {
@@ -26,14 +56,3 @@ class NexusBrain:
             "category": category,
             "reply": response
         }
-
-    def generate_response(self, message, category):
-        responses = {
-            "chat": "Привет! Я NEXUS AI. Я готов общаться и помогать тебе.",
-            "think": "Я получил задачу для анализа. Модуль рассуждений NEXUS готовится.",
-            "code": "Запрос направлен в NEXUS CODE. Модуль программирования готовится.",
-            "vision": "Запрос направлен в NEXUS VISION. Модуль обработки изображений готовится.",
-            "documents": "Запрос направлен в NEXUS DOCS. Модуль документов готовится."
-        }
-
-        return responses.get(category, "NEXUS AI получил твоё сообщение.")
