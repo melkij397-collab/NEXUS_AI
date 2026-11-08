@@ -1,13 +1,21 @@
 import os
 import logging
+import secrets
 
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, session
 from core.brain import NexusBrain
 
 app = Flask(__name__, static_folder=".")
-logging.basicConfig(level=logging.INFO)
+app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 
-nexus = NexusBrain()
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=True,
+    PERMANENT_SESSION_LIFETIME=60 * 60 * 24 * 30
+)
+
+logging.basicConfig(level=logging.INFO)
 
 
 @app.route("/")
@@ -33,7 +41,16 @@ def chat():
     if not isinstance(user_message, str) or not user_message.strip():
         return jsonify({"error": "Пустое сообщение"}), 400
 
+    if len(user_message) > 10000:
+        return jsonify({"error": "Сообщение слишком длинное"}), 413
+
+    if "user_id" not in session:
+        session["user_id"] = secrets.token_hex(24)
+
+    session.permanent = True
+
     try:
+        nexus = NexusBrain(session["user_id"])
         result = nexus.process(user_message)
 
         return jsonify({
@@ -44,19 +61,19 @@ def chat():
         })
 
     except Exception:
-        app.logger.exception("Ошибка NEXUS AI")
+        app.logger.exception("Ошибка Flint")
         return jsonify({
-            "error": "Внутренняя ошибка NEXUS AI"
+            "error": "Внутренняя ошибка Flint"
         }), 500
 
 
 @app.route("/api/status")
 def status():
     return jsonify({
-        "name": "NEXUS AI",
+        "name": "Flint",
         "status": "online",
         "engine": "NEXUS Brain",
-        "version": "4.0.0"
+        "version": "6.0.0"
     })
 
 

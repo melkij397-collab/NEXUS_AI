@@ -3,101 +3,224 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NEXUS AI</title>
+<meta name="theme-color" content="#10111a">
+<title>Flint AI</title>
 <style>
+:root{--bg:#10111a;--panel:#171923;--panel2:#202231;--text:#f3f3fa;--muted:#9295aa;--accent:#9277ff;--border:#292b3b}
 *{box-sizing:border-box}
-body{margin:0;background:#090d18;color:#edf2ff;font-family:Arial,sans-serif}
-header{padding:20px;text-align:center;border-bottom:1px solid #27334d}
-h1{margin:0;color:#70b7ff;letter-spacing:3px}
-header p{color:#8e9bb5;font-size:13px}
-#chat{height:calc(100vh - 175px);overflow-y:auto;padding:16px;max-width:850px;margin:auto}
-.msg{padding:13px 16px;margin:12px 0;border-radius:14px;max-width:90%;white-space:pre-wrap;line-height:1.5;overflow-wrap:anywhere}
-.user{background:#193d67;margin-left:auto}
-.ai{background:#182237;margin-right:auto}
-#controls{position:fixed;bottom:0;left:0;right:0;background:#10182a;padding:12px;display:flex;gap:8px}
-input{flex:1;min-width:0;background:#202c43;color:white;border:1px solid #3a4b69;border-radius:12px;padding:14px;font-size:16px}
-button{background:#3989df;color:white;border:0;border-radius:12px;padding:0 20px;font-size:15px}
-button:disabled{opacity:.5}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;height:100dvh;overflow:hidden}
+button,input{font:inherit}
+button{cursor:pointer}
+.app{height:100dvh;display:flex}
+.sidebar{width:275px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:17px;flex-shrink:0;transition:.25s}
+.brand{display:flex;align-items:center;gap:11px;padding:5px 3px 23px}
+.logo{width:39px;height:39px;border-radius:13px;background:linear-gradient(135deg,#a48aff,#5c72e8);display:grid;place-items:center;font-size:23px;font-weight:bold;color:white}
+.brand-name{font-size:22px;font-weight:bold;letter-spacing:1px}
+.brand-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.menu-btn{width:100%;border:0;background:transparent;color:#c8c9d8;text-align:left;padding:12px;border-radius:11px;display:flex;align-items:center;gap:12px;margin-bottom:5px}
+.menu-btn:hover,.menu-btn.active{background:var(--panel2);color:white}
+.menu-btn.active{outline:1px solid #514477}
+.new-chat{background:linear-gradient(110deg,#8768ee,#6479ed);color:white;border:0;border-radius:12px;padding:13px;text-align:left;margin-bottom:17px;font-weight:bold}
+.section{font-size:11px;color:var(--muted);letter-spacing:1px;margin:20px 9px 9px}
+.history{overflow:auto;flex:1}
+.chat-item{padding:11px;border-radius:9px;color:#b8b9ca;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.chat-item:hover,.chat-item.selected{background:var(--panel2);color:white}
+.profile{border-top:1px solid var(--border);padding-top:14px;display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:#35304e;display:grid;place-items:center;color:#c4b4ff}
+.profile small{display:block;color:var(--muted);margin-top:3px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{height:65px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:13px}
+.top-title{font-size:15px;font-weight:bold;flex:1}
+.top-sub{font-size:11px;color:#8c8fa4;margin-top:4px}
+.icon-btn{background:transparent;border:0;color:#b9bbce;font-size:21px;padding:8px;border-radius:9px}
+.icon-btn:hover{background:var(--panel2)}
+.content{flex:1;overflow-y:auto;padding:25px 18px 155px}
+.welcome{max-width:720px;margin:12vh auto 30px;text-align:center}
+.spark{font-size:42px;color:#a38aff}
+.welcome h1{font-size:34px;margin:13px 0 9px}
+.welcome p{color:var(--muted);font-size:14px}
+.suggestions{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin-top:35px}
+.suggestion{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:17px;text-align:left;color:var(--text)}
+.suggestion:hover{border-color:var(--accent)}
+.suggestion b{display:block;margin-bottom:7px;font-size:14px}
+.suggestion span{font-size:12px;color:var(--muted)}
+.messages{max-width:790px;margin:auto}
+.msg{display:flex;gap:12px;margin:22px 0;align-items:flex-start}
+.msg-avatar{width:32px;height:32px;border-radius:11px;flex-shrink:0;display:grid;place-items:center;background:#302a4c;color:#bba9ff;font-weight:bold}
+.msg.user .msg-avatar{background:#263b5d;color:#9dc6ff}
+.msg-body{line-height:1.65;font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere;padding-top:5px;flex:1}
+.msg.user .msg-body{color:#c6d8ff}
+.composer-wrap{position:fixed;bottom:0;left:275px;right:0;padding:20px;background:linear-gradient(transparent,var(--bg) 25%)}
+.composer{max-width:790px;margin:auto;background:var(--panel2);border:1px solid #39394f;border-radius:17px;padding:10px;display:flex;align-items:flex-end;gap:9px}
+.composer:focus-within{border-color:#8069dc}
+#message{flex:1;min-width:0;resize:none;max-height:140px;background:transparent;border:0;outline:0;color:white;padding:9px;font-size:15px}
+#send{width:40px;height:40px;border:0;border-radius:12px;background:var(--accent);color:white;font-size:18px}
+#send:disabled{opacity:.5}
+.hint{text-align:center;font-size:11px;color:#777b91;margin:10px}
+.page{max-width:790px;margin:35px auto}
+.page h2{font-size:25px}
+.page p{color:var(--muted);line-height:1.6}
+.page-card{padding:18px;background:var(--panel);border:1px solid var(--border);border-radius:14px;margin:12px 0}
+.search{width:100%;padding:13px;background:var(--panel2);border:1px solid var(--border);border-radius:11px;color:white;margin:12px 0}
+.mobile-menu{display:none}
+@media(max-width:700px){
+.sidebar{position:fixed;z-index:5;top:0;bottom:0;left:0;transform:translateX(-100%);width:285px;box-shadow:10px 0 35px #0008}
+.sidebar.open{transform:translateX(0)}
+.mobile-menu{display:block}
+.composer-wrap{left:0;padding:12px}
+.content{padding:15px 14px 145px}
+.welcome{margin-top:9vh}
+.welcome h1{font-size:28px}
+.suggestions{grid-template-columns:1fr}
+.topbar{padding:0 12px}
+}
 </style>
 </head>
 <body>
-<header>
-<h1>NEXUS AI</h1>
-<p>Персональный искусственный интеллект</p>
-</header>
-
-<main id="chat">
-<div class="msg ai">Привет! Я NEXUS AI. Чем могу помочь?</div>
-</main>
-
-<div id="controls">
-<input id="message" placeholder="Напиши сообщение..." autocomplete="off">
-<button id="send">Отправить</button>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+<div class="brand">
+<div class="logo">✦</div>
+<div><div class="brand-name">FLINT</div><div class="brand-sub">YOUR AI ASSISTANT</div></div>
 </div>
+<button class="new-chat" id="newChat">＋ Новый чат</button>
+<button class="menu-btn active" data-page="chat">◈　Чат</button>
+<button class="menu-btn" data-page="search">⌕　Поиск по чатам</button>
+<button class="menu-btn" data-page="projects">▣　Проекты</button>
+<button class="menu-btn" data-page="library">▤　Библиотека</button>
+<div class="section">ИСТОРИЯ</div>
+<div class="history" id="historyList"></div>
+<div class="profile">
+<div class="avatar">F</div>
+<div><b>Flint AI</b><small>Персональный помощник</small></div>
+</div>
+</aside>
 
+<main class="main">
+<div class="topbar">
+<button class="icon-btn mobile-menu" id="menuToggle">☰</button>
+<div style="flex:1"><div class="top-title" id="topTitle">Новый чат</div><div class="top-sub">Flint AI · Персональный интеллект</div></div>
+<button class="icon-btn" id="settingsBtn" title="Настройки">⚙</button>
+</div>
+<div class="content" id="content"></div>
+<div class="composer-wrap" id="composerWrap">
+<div class="composer">
+<textarea id="message" rows="1" placeholder="Спроси что-нибудь у Flint..." ></textarea>
+<button id="send" title="Отправить">➤</button>
+</div>
+<div class="hint">Flint может ошибаться. Проверяй важную информацию.</div>
+</div>
+</main>
+</div>
 <script>
-const chat = document.getElementById("chat");
-const input = document.getElementById("message");
-const button = document.getElementById("send");
-let history = [];
+const content=document.getElementById("content");
+const input=document.getElementById("message");
+const send=document.getElementById("send");
+const historyList=document.getElementById("historyList");
+const sidebar=document.getElementById("sidebar");
+let chats=JSON.parse(localStorage.getItem("flint_chats")||"[]");
+let currentId=null;
+let history=[];
+let busy=false;
 
-function addMessage(text, type) {
-    const div = document.createElement("div");
-    div.className = "msg " + type;
-    div.textContent = text;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-    return div;
+function save(){localStorage.setItem("flint_chats",JSON.stringify(chats))}
+function newChat(){
+ currentId=null;history=[];
+ document.getElementById("topTitle").textContent="Новый чат";
+ showWelcome();renderHistory();showChatPage();sidebar.classList.remove("open");
 }
-
-async function sendMessage() {
-    const text = input.value.trim();
-    if (!text || button.disabled) return;
-
-    input.value = "";
-    addMessage(text, "user");
-    history.push({role: "user", content: text});
-
-    button.disabled = true;
-    const waiting = addMessage("NEXUS AI думает...", "ai");
-
-    try {
-        const response = await fetch("/api/chat", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({messages: history})
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.details || data.error || "Ошибка сервера");
-        }
-
-        const answer = data.reply || data.answer;
-
-        if (typeof answer !== "string" || !answer.trim()) {
-            throw new Error("Сервер вернул пустой ответ");
-        }
-
-        waiting.textContent = answer;
-        history.push({role: "assistant", content: answer});
-
-    } catch (error) {
-        waiting.textContent = "Ошибка: " + error.message;
-        history.pop();
-    } finally {
-        button.disabled = false;
-        input.focus();
-        chat.scrollTop = chat.scrollHeight;
-    }
+function showChatPage(){
+ document.querySelectorAll(".menu-btn").forEach(b=>b.classList.toggle("active",b.dataset.page==="chat"));
+ document.getElementById("composerWrap").style.display="block";
 }
-
-button.addEventListener("click", sendMessage);
-
-input.addEventListener("keydown", event => {
-    if (event.key === "Enter") sendMessage();
-});
+function showWelcome(){
+ content.innerHTML=`<div class="welcome"><div class="spark">✦</div><h1>Привет! Я Flint.</h1><p>Твой персональный искусственный интеллект. Чем займёмся сегодня?</p>
+ <div class="suggestions">
+ <button class="suggestion" data-prompt="Помоги мне написать программу"><b>⌘ Программирование</b><span>Создавать код и разбирать ошибки</span></button>
+ <button class="suggestion" data-prompt="Объясни мне сложную тему простыми словами"><b>◈ Обучение</b><span>Изучать новое и разбираться в темах</span></button>
+ <button class="suggestion" data-prompt="Предложи интересные идеи для проекта"><b>✧ Идеи</b><span>Придумывать и планировать проекты</span></button>
+ <button class="suggestion" data-prompt="Помоги составить план на сегодня"><b>▦ Планирование</b><span>Организовать задачи и время</span></button>
+ </div></div>`;
+ content.querySelectorAll("[data-prompt]").forEach(b=>b.onclick=()=>{input.value=b.dataset.prompt;sendMessage()});
+}
+function renderHistory(){
+ historyList.innerHTML="";
+ chats.slice().reverse().forEach(c=>{
+  const el=document.createElement("div");el.className="chat-item"+(c.id===currentId?" selected":"");el.textContent=c.title;
+  el.onclick=()=>openChat(c.id);historyList.appendChild(el);
+ });
+}
+function openChat(id){
+ const c=chats.find(x=>x.id===id);if(!c)return;
+ currentId=id;history=c.messages.map(m=>({...m}));
+ document.getElementById("topTitle").textContent=c.title;
+ showChatPage();renderMessages();renderHistory();sidebar.classList.remove("open");
+}
+function renderMessages(){
+ content.innerHTML='<div class="messages" id="messages"></div>';
+ const box=document.getElementById("messages");
+ history.forEach(m=>addMessage(m.content,m.role==="user"?"user":"ai",box));
+}
+function addMessage(text,type,box){
+ const row=document.createElement("div");row.className="msg "+type;
+ const avatar=document.createElement("div");avatar.className="msg-avatar";avatar.textContent=type==="user"?"Я":"✦";
+ const body=document.createElement("div");body.className="msg-body";body.textContent=text;
+ row.append(avatar,body);box.appendChild(row);content.scrollTop=content.scrollHeight;return body;
+}
+async function sendMessage(){
+ const text=input.value.trim();if(!text||busy)return;
+ if(!currentId){currentId=Date.now().toString();chats.push({id:currentId,title:text.slice(0,42),messages:[]});}
+ input.value="";input.style.height="auto";showChatPage();
+ if(!document.getElementById("messages"))content.innerHTML='<div class="messages" id="messages"></div>';
+ const box=document.getElementById("messages");
+ history.push({role:"user",content:text});addMessage(text,"user",box);
+ const chat=chats.find(c=>c.id===currentId);chat.messages=history.map(m=>({...m}));save();renderHistory();
+ document.getElementById("topTitle").textContent=chat.title;
+ busy=true;send.disabled=true;const waiting=addMessage("Flint думает...","ai",box);
+ try{
+  const response=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:history})});
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.details||data.error||"Ошибка сервера");
+  const answer=data.reply||data.answer;
+  if(typeof answer!=="string"||!answer.trim())throw new Error("Пустой ответ сервера");
+  waiting.textContent=answer;history.push({role:"assistant",content:answer});
+  chat.messages=history.map(m=>({...m}));save();
+ }catch(error){waiting.textContent="Ошибка: "+error.message;history.pop();chat.messages=history.map(m=>({...m}));save();}
+ finally{busy=false;send.disabled=false;input.focus();content.scrollTop=content.scrollHeight;}
+}
+function page(name){
+ showChatPage();content.innerHTML="";
+ document.querySelectorAll(".menu-btn").forEach(b=>b.classList.toggle("active",b.dataset.page===name));
+ document.getElementById("composerWrap").style.display="none";
+ const p=document.createElement("div");p.className="page";content.appendChild(p);
+ if(name==="search"){
+  p.innerHTML="<h2>Поиск по чатам</h2><p>Найди нужный разговор по названию или сообщению.</p><input class='search' id='searchInput' placeholder='Поиск...'><div id='searchResults'></div>";
+  const search=document.getElementById("searchInput");search.oninput=()=>{
+   const q=search.value.toLowerCase();const results=document.getElementById("searchResults");results.innerHTML="";
+   chats.filter(c=>c.title.toLowerCase().includes(q)||c.messages.some(m=>m.content.toLowerCase().includes(q))).forEach(c=>{
+    const d=document.createElement("div");d.className="page-card";d.textContent=c.title;d.onclick=()=>openChat(c.id);results.appendChild(d);
+   });
+  };
+ }else if(name==="projects"){
+  p.innerHTML="<h2>Проекты</h2><p>Рабочее пространство Flint для твоих идей.</p><div class='page-card'>▣　Здесь появятся твои проекты.</div>";
+ }else if(name==="library"){
+  p.innerHTML="<h2>Библиотека</h2><p>Место для материалов и полезной информации.</p><div class='page-card'>▤　Библиотека пока пуста.</div>";
+ }
+ sidebar.classList.remove("open");
+}
+document.getElementById("newChat").onclick=newChat;
+document.getElementById("menuToggle").onclick=()=>sidebar.classList.toggle("open");
+document.querySelectorAll(".menu-btn").forEach(b=>b.onclick=()=>{if(b.dataset.page==="chat")newChat();else page(b.dataset.page)});
+document.getElementById("settingsBtn").onclick=()=>{
+ document.getElementById("composerWrap").style.display="none";
+ document.querySelectorAll(".menu-btn").forEach(b=>b.classList.remove("active"));
+ content.innerHTML="<div class='page'><h2>Настройки Flint</h2><p>Настройки интерфейса и приложения.</p><div class='page-card'><b>Тема</b><p>Тёмная тема включена.</p></div><div class='page-card'><b>История чатов</b><p>Разговоры сохраняются в памяти браузера на этом устройстве.</p><button id='clearHistory' style='background:#a74655;color:white;border:0;border-radius:9px;padding:11px'>Очистить историю</button></div></div>";
+ document.getElementById("clearHistory").onclick=()=>{if(confirm("Удалить всю историю чатов?")){chats=[];save();newChat();}};
+};
+send.onclick=sendMessage;
+input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage()}});
+input.addEventListener("input",()=>{input.style.height="auto";input.style.height=Math.min(input.scrollHeight,140)+"px"});
+renderHistory();showWelcome();
 </script>
 </body>
 </html>

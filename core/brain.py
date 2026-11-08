@@ -5,11 +5,11 @@ from modules.web import NexusWeb
 
 
 class NexusBrain:
-    def __init__(self):
-        self.name = "NEXUS AI"
-        self.version = "5.0.0"
+    def __init__(self, session_id="default"):
+        self.name = "Flint"
+        self.version = "6.0.0"
 
-        self.memory = NexusMemory()
+        self.memory = NexusMemory(session_id)
         self.router = NexusRouter()
         self.llm = NexusLLM()
         self.web = NexusWeb()
@@ -19,14 +19,9 @@ class NexusBrain:
             raise ValueError("Пустое сообщение")
 
         message = message.strip()
-
-        # Загружаем предыдущую историю
         history = self.memory.get_history(limit=12)
-
-        # Определяем категорию запроса
         category = self.router.route(message)
 
-        # Получаем дополнительную информацию
         search_data = self.web.search(message)
         search_context = ""
 
@@ -37,7 +32,6 @@ class NexusBrain:
                     for item in search_data.get("results", [])
                 )
 
-        # Передаём модели историю отдельными сообщениями
         context = history
 
         if search_context:
@@ -46,13 +40,8 @@ class NexusBrain:
                 "content": "Результаты веб-поиска:\n" + search_context
             }]
 
-        # Генерируем ответ
-        response = self.llm.generate(
-            message,
-            context=context
-        )
+        response = self.llm.generate(message, context=context)
 
-        # Сохраняем диалог
         self.memory.add("user", message)
         self.memory.add("assistant", response)
 
