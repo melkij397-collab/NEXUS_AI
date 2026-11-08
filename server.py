@@ -56,7 +56,7 @@ def status():
         "name": "NEXUS AI",
         "status": "online",
         "engine": "NEXUS Brain",
-        "version": "1.0.0"
+        "version": "4.0.0"
     })
 
 
