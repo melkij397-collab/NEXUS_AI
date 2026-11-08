@@ -1,18 +1,13 @@
-
 import os
 import logging
-import requests
 
 from flask import Flask, request, jsonify, send_from_directory
+from core.brain import NexusBrain
 
 app = Flask(__name__, static_folder=".")
-
 logging.basicConfig(level=logging.INFO)
 
-API_URL = "https://router.huggingface.co/v1/chat/completions"
-
-# Модель и провайдер
-MODEL = "Qwen/Qwen2.5-7B-Instruct:featherless-ai"
+nexus = NexusBrain()
 
 
 @app.route("/")
@@ -22,92 +17,49 @@ def home():
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
-    token = os.getenv("HF_TOKEN")
-
-    if not token:
-        return jsonify({
-            "error": "Не настроен токен HF_TOKEN"
-        }), 500
-
     data = request.get_json(silent=True) or {}
     messages = data.get("messages", [])
 
     if not isinstance(messages, list) or not messages:
-        return jsonify({
-            "error": "Сообщения не найдены"
-        }), 400
+        return jsonify({"error": "Напиши сообщение"}), 400
 
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+    user_message = None
 
-    payload = {
-        "model": MODEL,
-        "messages": messages,
-        "max_tokens": 1000,
-        "temperature": 0.7
-    }
+    for message in reversed(messages):
+        if isinstance(message, dict) and message.get("role") == "user":
+            user_message = message.get("content")
+            break
+
+    if not isinstance(user_message, str) or not user_message.strip():
+        return jsonify({"error": "Пустое сообщение"}), 400
 
     try:
-        response = requests.post(
-            API_URL,
-            headers=headers,
-            json=payload,
-            timeout=120
-        )
-
-        if response.status_code != 200:
-            app.logger.error(
-                "Hugging Face error: %s %s",
-                response.status_code,
-                response.text[:1000]
-            )
-
-            return jsonify({
-                "error": "Ошибка Hugging Face",
-                "details": response.text[:1000]
-            }), response.status_code
-
-        result = response.json()
-
-        choices = result.get("choices", [])
-
-        if not choices:
-            return jsonify({
-                "error": "Модель вернула пустой ответ"
-            }), 502
-
-        answer = choices[0].get("message", {}).get("content", "")
-
-        if not answer:
-            return jsonify({
-                "error": "Пустой ответ модели"
-            }), 502
+        result = nexus.process(user_message)
 
         return jsonify({
-            "reply": answer
+            "reply": result["reply"],
+            "name": result["name"],
+            "version": result["version"],
+            "category": result["category"]
         })
 
-    except requests.exceptions.Timeout:
-        return jsonify({
-            "error": "Превышено время ожидания ответа"
-        }), 504
-
-    except requests.exceptions.RequestException:
-        app.logger.exception("Ошибка соединения")
-        return jsonify({
-            "error": "Не удалось подключиться к Hugging Face"
-        }), 502
-
     except Exception:
-        app.logger.exception("Внутренняя ошибка")
+        app.logger.exception("Ошибка NEXUS AI")
         return jsonify({
-            "error": "Внутренняя ошибка сервера"
+            "error": "Внутренняя ошибка NEXUS AI"
         }), 500
+
+
+@app.route("/api/status")
+def status():
+    return jsonify({
+        "name": "NEXUS AI",
+        "status": "online",
+        "engine": "NEXUS Brain",
+        "version": "1.0.0"
+    })
 
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
