@@ -8,7 +8,7 @@ load_dotenv()
 class NexusLLM:
     def __init__(self):
         self.token = os.getenv("OPENROUTER_API_KEY")
-        self.model = "openrouter/free"
+        self.model = "nvidia/nemotron-3-ultra-550b-a55b:free"
         self.url = "https://openrouter.ai/api/v1/chat/completions"
 
         self.system_prompt = """
