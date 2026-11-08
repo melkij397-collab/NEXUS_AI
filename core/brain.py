@@ -1,4 +1,5 @@
 from core.memory import NexusMemory
+from core.memory_engine import NexusMemoryEngine
 from core.router import NexusRouter
 from modules.llm import NexusLLM
 from modules.web import NexusWeb
@@ -10,6 +11,7 @@ class NexusBrain:
         self.version = "6.0.0"
 
         self.memory = NexusMemory(session_id)
+        self.long_term_memory = NexusMemoryEngine(session_id)
         self.router = NexusRouter()
         self.llm = NexusLLM()
         self.web = NexusWeb()
@@ -28,19 +30,38 @@ class NexusBrain:
         if isinstance(search_data, dict):
             if search_data.get("status") == "success":
                 search_context = "\n".join(
-                    f"{item['title']}: {item['text']}"
+                    f"{item.get('title', '')}: {item.get('text', '')}"
                     for item in search_data.get("results", [])
                 )
 
-        context = history
+        memory_facts = self.long_term_memory.list_facts(limit=30)
+        memory_lines = []
+
+        for fact in memory_facts:
+            memory_lines.append(
+                f"[{fact['category']}] {fact['content']}"
+            )
+
+        context_parts = []
+
+        if memory_lines:
+            context_parts.append(
+                "Сохранённые факты о пользователе:\n"
+                + "\n".join(memory_lines)
+            )
 
         if search_context:
-            context = history + [{
-                "role": "system",
-                "content": "Результаты веб-поиска:\n" + search_context
-            }]
+            context_parts.append(
+                "Результаты веб-поиска:\n" + search_context
+            )
 
-        response = self.llm.generate(message, context=context)
+        memory_context = "\n\n".join(context_parts)
+
+        response = self.llm.generate(
+            message,
+            context=history,
+            memory_context=memory_context
+        )
 
         self.memory.add("user", message)
         self.memory.add("assistant", response)
