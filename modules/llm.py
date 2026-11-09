@@ -12,7 +12,7 @@ class NexusLLM:
         self.url = "https://openrouter.ai/api/v1/chat/completions"
 
         self.system_prompt = """
-Ты — Flint, интеллектуальный универсальный ИИ-помощник проекта NEXUS AI.
+Ты — LIGHT BYTE, интеллектуальный универсальный ИИ-помощник проекта LIGHT BYTE.
 
 ТВОИ ПРИНЦИПЫ:
 1. Понимай смысл вопросов и намерения пользователя.
@@ -103,7 +103,7 @@ class NexusLLM:
                     "Authorization": f"Bearer {self.token}",
                     "Content-Type": "application/json",
                     "HTTP-Referer": "https://nexus-ai-d4of.onrender.com",
-                    "X-Title": "NEXUS AI"
+                    "X-Title": "LIGHT BYTE"
                 },
                 json={
                     "model": self.model,
@@ -136,3 +136,89 @@ class NexusLLM:
 
         except (KeyError, ValueError, IndexError, TypeError):
             return "Не удалось обработать ответ языковой модели."
+
+    def generate_stream(self, question, context=None, memory_context=None):
+        if not self.token:
+            yield "Ошибка: OPENROUTER_API_KEY не найден."
+            return
+
+        messages = [
+            {"role": "system", "content": self.system_prompt}
+        ]
+
+        if isinstance(memory_context, str) and memory_context.strip():
+            messages.append({
+                "role": "system",
+                "content": (
+                    "Долговременная память пользователя. "
+                    "Учитывай эти сведения, если они относятся к вопросу.\n"
+                    + memory_context[:6000]
+                )
+            })
+
+        if isinstance(context, list):
+            for item in context[-12:]:
+                if not isinstance(item, dict):
+                    continue
+
+                role = item.get("role")
+                content = item.get("content")
+
+                if role in ("user", "assistant") and isinstance(content, str):
+                    messages.append({
+                        "role": role,
+                        "content": content[:4000]
+                    })
+
+        messages.append({"role": "user", "content": question})
+
+        try:
+            with requests.post(
+                self.url,
+                headers={
+                    "Authorization": f"Bearer {self.token}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://nexus-ai-d4of.onrender.com",
+                    "X-Title": "LIGHT BYTE"
+                },
+                json={
+                    "model": self.model,
+                    "messages": messages,
+                    "temperature": 0.7,
+                    "max_tokens": 1500,
+                    "stream": True
+                },
+                stream=True,
+                timeout=(15, 120)
+            ) as response:
+                if response.status_code != 200:
+                    yield f"Ошибка OpenRouter HTTP {response.status_code}."
+                    return
+
+                response.encoding = "utf-8"
+                for line in response.iter_lines(decode_unicode=True):
+                    if not line:
+                        continue
+
+
+                    if not line.startswith("data:"):
+                        continue
+
+                    data = line[5:].strip()
+
+                    if data == "[DONE]":
+                        return
+
+                    try:
+                        import json
+                        chunk = json.loads(data)
+                        content = chunk["choices"][0]["delta"].get("content")
+                        if isinstance(content, str) and content:
+                            yield content
+                    except (ValueError, KeyError, IndexError, TypeError):
+                        continue
+
+        except requests.Timeout:
+            yield "\nПревышено время ожидания ответа."
+        except requests.RequestException:
+            yield "\nОшибка соединения с OpenRouter."

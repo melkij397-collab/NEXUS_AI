@@ -2,3 +2,7 @@
 __pycache__/
 *.pyc
 data/
+
+# Local backup files
+*.backup
+*-backup

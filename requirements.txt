@@ -3,3 +3,4 @@ requests
 python-dotenv
 gunicorn
 Pillow
+Flask-Limiter==4.1.1

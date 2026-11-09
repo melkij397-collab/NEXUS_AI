@@ -1,6 +1,6 @@
 class NexusChat:
     def __init__(self):
-        self.name = "NEXUS AI"
+        self.name = "LIGHT BYTE"
         self.version = "3.0.0"
 
     def respond(self, message):
@@ -10,13 +10,13 @@ class NexusChat:
         text = message.lower().strip()
 
         if any(x in text for x in ["привет", "здравствуй", "салют"]):
-            return "Привет! Я NEXUS AI. Рад помочь. Что будем решать?"
+            return "Привет! Я LIGHT BYTE. Рад помочь. Что будем решать?"
 
         if "как дела" in text:
             return "Всё работает! Готов помочь тебе."
 
         if "кто ты" in text:
-            return "Я NEXUS AI — твой интеллектуальный помощник."
+            return "Я LIGHT BYTE — твой интеллектуальный помощник."
 
         if "что умеешь" in text:
             return "Я создан для общения, анализа вопросов, помощи с программированием и решения задач."

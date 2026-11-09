@@ -1,0 +1,169 @@
+
+=================================================================
+NEXUS AI — ПОЛНЫЙ АУДИТ
+=================================================================
+Дата: 2026-11-09T12:55:57
+Python: 3.14.10
+Файлов: 59 | Папок: 8
+
+=================================================================
+1. СТРУКТУРА
+=================================================================
+[ROOT] github-copy
+  [DIR] core
+    [DIR] core
+      [DIR] core
+  [DIR] data
+    [DIR] users
+  [DIR] modules
+  [DIR] server
+
+=================================================================
+2. ФАЙЛЫ
+=================================================================
+[SECRET — ПРОПУЩЕН] .env
+[FILE] .gitignore | 70 bytes
+[FILE] brain.py | 1999 bytes
+[FILE] index.html | 16853 bytes
+[FILE] index.html.backup | 3304 bytes
+[FILE] index.html.before-redesign | 14650 bytes
+[FILE] index.html.menu-backup | 3292 bytes
+[FILE] index.html.stream-backup | 15709 bytes
+[FILE] memory.py | 994 bytes
+[FILE] nexus.css | 3059 bytes
+[FILE] project_audit.py | 4688 bytes
+[FILE] requirements.txt | 66 bytes
+[FILE] requirements.txt. | 41 bytes
+[FILE] router.py | 1280 bytes
+[FILE] server.py | 5249 bytes
+[FILE] server.py.backup | 1664 bytes
+[FILE] server.py.dotenv-backup | 3152 bytes
+[FILE] server.py.dotenv-order-backup | 3252 bytes
+[FILE] server.py.emergency-backup | 2734 bytes
+[FILE] server.py.loadguard-backup | 2675 bytes
+[FILE] server.py.security-backup | 2189 bytes
+[FILE] server.py.stream-backup | 3365 bytes
+[FILE] core/__init__.py | 0 bytes
+[FILE] core/brain.py | 3704 bytes
+[FILE] core/brain.py. | 1997 bytes
+[FILE] core/brain.py.backup | 1993 bytes
+[FILE] core/brain.py.speed-backup | 2239 bytes
+[FILE] core/brain.stream-backup | 2503 bytes
+[FILE] core/emergency_shield.py | 1985 bytes
+[FILE] core/load_guard.backup | 2002 bytes
+[FILE] core/load_guard.py | 2558 bytes
+[FILE] core/load_guard.stream-backup | 2289 bytes
+[FILE] core/memory.py | 1381 bytes
+[FILE] core/memory.py. | 991 bytes
+[FILE] core/memory.py.backup | 1005 bytes
+[FILE] core/memory_engine.py | 3233 bytes
+[FILE] core/router.py | 1351 bytes
+[FILE] core/router.py. | 1280 bytes
+[FILE] core/core/core/__init__.py. | 21 bytes
+[FILE] data/memory.json | 3590 bytes
+[FILE] data/nexus_memory.db | 16384 bytes
+[FILE] data/users/4ed60dabaeb43e3a65cfa613651d833feaf53ba13099dc9d.json | 283 bytes
+[FILE] data/users/b142c3c9dee41de6e6096b3df843478001e844c266e1ab62.json | 291 bytes
+[FILE] data/users/ba3b6fc4e1929d67d4932b67ba521e24ab0d65628f439c47.json | 1091 bytes
+[FILE] data/users/c9762640fb00ef19006229af529ce6bbab14f0b7bf7a7242.json | 13434 bytes
+[FILE] data/users/memory_integration_test.json | 2 bytes
+[FILE] modules/__init__.py | 0 bytes
+[FILE] modules/answer.py | 1237 bytes
+[FILE] modules/chat.py | 1116 bytes
+[FILE] modules/code.py | 668 bytes
+[FILE] modules/documents.py | 0 bytes
+[FILE] modules/llm.py | 9240 bytes
+[FILE] modules/llm.py.backup | 4081 bytes
+[FILE] modules/llm.py.prompt-backup | 4104 bytes
+[FILE] modules/llm.stream-backup | 6034 bytes
+[FILE] modules/think.py | 808 bytes
+[FILE] modules/vision.py | 754 bytes
+[FILE] modules/web.py | 1524 bytes
+[FILE] server/server.ру | 1865 bytes
+
+=================================================================
+3. PYTHON
+=================================================================
+[OK] brain.py
+[OK] memory.py
+[OK] project_audit.py
+[OK] router.py
+[OK] server.py
+[OK] core/__init__.py
+[OK] core/brain.py
+[OK] core/emergency_shield.py
+[OK] core/load_guard.py
+[OK] core/memory.py
+[OK] core/memory_engine.py
+[OK] core/router.py
+[OK] modules/__init__.py
+[OK] modules/answer.py
+[OK] modules/chat.py
+[OK] modules/code.py
+[OK] modules/documents.py
+[OK] modules/llm.py
+[OK] modules/think.py
+[OK] modules/vision.py
+[OK] modules/web.py
+ИТОГО: 21 успешно, 0 ошибок
+
+=================================================================
+4. JAVASCRIPT
+=================================================================
+[SKIP] Node.js не найден
+
+=================================================================
+5. HTML / INLINE JAVASCRIPT
+=================================================================
+[HTML] index.html
+
+=================================================================
+6. ОСНОВНЫЕ ФАЙЛЫ
+=================================================================
+[FOUND] server.py
+[FOUND] index.html
+[FOUND] requirements.txt
+[FOUND] nexus.css
+[FOUND] core/brain.py
+[FOUND] core/memory.py
+[FOUND] core/load_guard.py
+[FOUND] core/emergency_shield.py
+[FOUND] modules/llm.py
+
+=================================================================
+7. CSS / JSON
+=================================================================
+[OK JSON] data/memory.json
+[OK JSON] data/users/4ed60dabaeb43e3a65cfa613651d833feaf53ba13099dc9d.json
+[OK JSON] data/users/b142c3c9dee41de6e6096b3df843478001e844c266e1ab62.json
+[OK JSON] data/users/ba3b6fc4e1929d67d4932b67ba521e24ab0d65628f439c47.json
+[OK JSON] data/users/c9762640fb00ef19006229af529ce6bbab14f0b7bf7a7242.json
+[OK JSON] data/users/memory_integration_test.json
+[CSS] nexus.css
+
+=================================================================
+8. GIT
+=================================================================
+M .gitignore
+ M core/brain.py
+ M index.html
+ M modules/llm.py
+ M requirements.txt
+ M server.py
+?? core/emergency_shield.py
+?? core/load_guard.py
+?? index.html.before-redesign
+?? nexus.css
+?? project_audit.py
+
+=================================================================
+9. ИТОГ
+=================================================================
+Всего файлов: 59
+Python-файлов: 21
+HTML-файлов: 1
+Папок: 8
+Ошибок Python: 0
+Содержимое секретов не читалось и не выводилось.
+Исходные файлы не изменялись.
+КОНЕЦ ОТЧЁТА

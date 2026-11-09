@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#10111a">
-<title>Flint AI</title>
+<title>LIGHT BYTE</title>
 <style>
 :root{--bg:#10111a;--panel:#171923;--panel2:#202231;--text:#f3f3fa;--muted:#9295aa;--accent:#9277ff;--border:#292b3b}
 *{box-sizing:border-box}
@@ -75,13 +75,14 @@ button{cursor:pointer}
 .topbar{padding:0 12px}
 }
 </style>
+<link rel="stylesheet" href="/nexus.css">
 </head>
 <body>
 <div class="app">
 <aside class="sidebar" id="sidebar">
 <div class="brand">
 <div class="logo">✦</div>
-<div><div class="brand-name">FLINT</div><div class="brand-sub">YOUR AI ASSISTANT</div></div>
+<div><div class="brand-name">LIGHT BYTE</div><div class="brand-sub">LIGHT BYTE AI ENGINE</div></div>
 </div>
 <button class="new-chat" id="newChat">＋ Новый чат</button>
 <button class="menu-btn active" data-page="chat">◈　Чат</button>
@@ -92,23 +93,23 @@ button{cursor:pointer}
 <div class="history" id="historyList"></div>
 <div class="profile">
 <div class="avatar">F</div>
-<div><b>Flint AI</b><small>Персональный помощник</small></div>
+<div><b>LIGHT BYTE</b><small>LIGHT BYTE AI · Персональный ИИ</small></div>
 </div>
 </aside>
 
 <main class="main">
 <div class="topbar">
 <button class="icon-btn mobile-menu" id="menuToggle">☰</button>
-<div style="flex:1"><div class="top-title" id="topTitle">Новый чат</div><div class="top-sub">Flint AI · Персональный интеллект</div></div>
+<div style="flex:1"><div class="top-title" id="topTitle">Новый чат</div><div class="top-sub">LIGHT BYTE · LIGHT BYTE AI</div></div>
 <button class="icon-btn" id="settingsBtn" title="Настройки">⚙</button>
 </div>
 <div class="content" id="content"></div>
 <div class="composer-wrap" id="composerWrap">
 <div class="composer">
-<textarea id="message" rows="1" placeholder="Спроси что-нибудь у Flint..." ></textarea>
+<textarea id="message" rows="1" placeholder="Спросить LIGHT BYTE..." ></textarea>
 <button id="send" title="Отправить">➤</button>
 </div>
-<div class="hint">Flint может ошибаться. Проверяй важную информацию.</div>
+<div class="hint">LIGHT BYTE может ошибаться. Проверяй важную информацию.</div>
 </div>
 </main>
 </div>
@@ -134,7 +135,7 @@ function showChatPage(){
  document.getElementById("composerWrap").style.display="block";
 }
 function showWelcome(){
- content.innerHTML=`<div class="welcome"><div class="spark">✦</div><h1>Привет! Я Flint.</h1><p>Твой персональный искусственный интеллект. Чем займёмся сегодня?</p>
+ content.innerHTML=`<div class="welcome"><div class="spark">✦</div><h1>Привет! Я LIGHT BYTE.</h1><p>Твой интеллектуальный помощник. Чем займёмся сегодня?</p>
  <div class="suggestions">
  <button class="suggestion" data-prompt="Помоги мне написать программу"><b>⌘ Программирование</b><span>Создавать код и разбирать ошибки</span></button>
  <button class="suggestion" data-prompt="Объясни мне сложную тему простыми словами"><b>◈ Обучение</b><span>Изучать новое и разбираться в темах</span></button>
@@ -161,32 +162,141 @@ function renderMessages(){
  const box=document.getElementById("messages");
  history.forEach(m=>addMessage(m.content,m.role==="user"?"user":"ai",box));
 }
+function renderAIMessage(body,text){
+ const blocks=[];
+ let source=String(text).replace(/```([\s\S]*?)```/g,(_,code)=>{
+  blocks.push("<pre><code>"+code.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+"</code></pre>");
+  return "NEXUSCODE"+(blocks.length-1)+"END";
+ });
+
+ const esc=v=>v.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+ let html=esc(source)
+  .replace(/^###\s+(.+)$/gm,"<h3>$1</h3>")
+  .replace(/^##\s+(.+)$/gm,"<h2>$1</h2>")
+  .replace(/^#\s+(.+)$/gm,"<h1>$1</h1>")
+  .replace(/\*\*\*(.+?)\*\*\*/g,"<strong><em>$1</em></strong>")
+  .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+  .replace(/\*(.+?)\*/g,"<em>$1</em>")
+  .replace(/`([^`]+)`/g,"<code>$1</code>")
+  .replace(/^\s*[-*]\s+(.+)$/gm,"<li>$1</li>")
+  .replace(/(?:<li>.*<\/li>\n?)+/g,m=>"<ul>"+m+"</ul>")
+  .replace(/\n/g,"<br>");
+
+ html=html.replace(/NEXUSCODE(\d+)END/g,(_,i)=>blocks[Number(i)]);
+ body.innerHTML=html;
+}
+
 function addMessage(text,type,box){
  const row=document.createElement("div");row.className="msg "+type;
  const avatar=document.createElement("div");avatar.className="msg-avatar";avatar.textContent=type==="user"?"Я":"✦";
- const body=document.createElement("div");body.className="msg-body";body.textContent=text;
+ const body=document.createElement("div");body.className="msg-body";
+ if(type==="ai")renderAIMessage(body,text);
+ else body.textContent=text;
  row.append(avatar,body);box.appendChild(row);content.scrollTop=content.scrollHeight;return body;
 }
 async function sendMessage(){
- const text=input.value.trim();if(!text||busy)return;
- if(!currentId){currentId=Date.now().toString();chats.push({id:currentId,title:text.slice(0,42),messages:[]});}
- input.value="";input.style.height="auto";showChatPage();
- if(!document.getElementById("messages"))content.innerHTML='<div class="messages" id="messages"></div>';
+ const text=input.value.trim();
+ if(!text||busy)return;
+
+ if(!currentId){
+  currentId=Date.now().toString();
+  chats.push({id:currentId,title:text.slice(0,42),messages:[]});
+ }
+
+ input.value="";
+ input.style.height="auto";
+ showChatPage();
+
+ if(!document.getElementById("messages")){
+  content.innerHTML='<div class="messages" id="messages"></div>';
+ }
+
  const box=document.getElementById("messages");
- history.push({role:"user",content:text});addMessage(text,"user",box);
- const chat=chats.find(c=>c.id===currentId);chat.messages=history.map(m=>({...m}));save();renderHistory();
+ history.push({role:"user",content:text});
+ addMessage(text,"user",box);
+
+ const chat=chats.find(c=>c.id===currentId);
+ chat.messages=history.map(m=>({...m}));
+ save();
+ renderHistory();
  document.getElementById("topTitle").textContent=chat.title;
- busy=true;send.disabled=true;const waiting=addMessage("Flint думает...","ai",box);
+
+ busy=true;
+ send.disabled=true;
+ const waiting=addMessage("LIGHT BYTE думает...","ai",box);
+
  try{
-  const response=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:history})});
-  const data=await response.json();
-  if(!response.ok)throw new Error(data.details||data.error||"Ошибка сервера");
-  const answer=data.reply||data.answer;
-  if(typeof answer!=="string"||!answer.trim())throw new Error("Пустой ответ сервера");
-  waiting.textContent=answer;history.push({role:"assistant",content:answer});
-  chat.messages=history.map(m=>({...m}));save();
- }catch(error){waiting.textContent="Ошибка: "+error.message;history.pop();chat.messages=history.map(m=>({...m}));save();}
- finally{busy=false;send.disabled=false;input.focus();content.scrollTop=content.scrollHeight;}
+  const response=await fetch("/api/chat/stream",{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({messages:history})
+  });
+
+  if(!response.ok){
+   let data={};
+   try{data=await response.json();}catch{}
+   throw new Error(data.details||data.error||"Ошибка сервера: "+response.status);
+  }
+
+  if(!response.body)throw new Error("Потоковый ответ не поддерживается браузером");
+
+  const reader=response.body.getReader();
+  const decoder=new TextDecoder();
+  let buffer="";
+  let answer="";
+  let streamDone=false;
+
+  function handleEvent(event){
+   const dataLine=event.split(/\r?\n/).find(line=>line.startsWith("data:"));
+   if(!dataLine)return;
+
+   const payload=JSON.parse(dataLine.slice(5).trim());
+
+   if(payload.error)throw new Error(payload.error);
+
+   if(typeof payload.token==="string"&&payload.token){
+    answer+=payload.token;
+    renderAIMessage(waiting,answer);
+    content.scrollTop=content.scrollHeight;
+   }
+
+   if(payload.done)streamDone=true;
+  }
+
+  while(!streamDone){
+   const result=await reader.read();
+   if(result.done)break;
+
+   buffer+=decoder.decode(result.value,{stream:true});
+   const events=buffer.split(/\r?\n\r?\n/);
+   buffer=events.pop()||"";
+
+   for(const event of events){
+    handleEvent(event);
+    if(streamDone)break;
+   }
+  }
+
+  buffer+=decoder.decode();
+  if(buffer.trim()&&!streamDone)handleEvent(buffer);
+
+  if(!answer.trim())throw new Error("Пустой ответ сервера");
+
+  history.push({role:"assistant",content:answer});
+  chat.messages=history.map(m=>({...m}));
+  save();
+
+ }catch(error){
+  waiting.textContent="Ошибка: "+error.message;
+  history.pop();
+  chat.messages=history.map(m=>({...m}));
+  save();
+ }finally{
+  busy=false;
+  send.disabled=false;
+  input.focus();
+  content.scrollTop=content.scrollHeight;
+ }
 }
 function page(name){
  showChatPage();content.innerHTML="";
@@ -202,7 +312,7 @@ function page(name){
    });
   };
  }else if(name==="projects"){
-  p.innerHTML="<h2>Проекты</h2><p>Рабочее пространство Flint для твоих идей.</p><div class='page-card'>▣　Здесь появятся твои проекты.</div>";
+  p.innerHTML="<h2>Проекты</h2><p>Рабочее пространство LIGHT BYTE для твоих идей.</p><div class='page-card'>▣　Здесь появятся твои проекты.</div>";
  }else if(name==="library"){
   p.innerHTML="<h2>Библиотека</h2><p>Место для материалов и полезной информации.</p><div class='page-card'>▤　Библиотека пока пуста.</div>";
  }
@@ -214,7 +324,7 @@ document.querySelectorAll(".menu-btn").forEach(b=>b.onclick=()=>{if(b.dataset.pa
 document.getElementById("settingsBtn").onclick=()=>{
  document.getElementById("composerWrap").style.display="none";
  document.querySelectorAll(".menu-btn").forEach(b=>b.classList.remove("active"));
- content.innerHTML="<div class='page'><h2>Настройки Flint</h2><p>Настройки интерфейса и приложения.</p><div class='page-card'><b>Тема</b><p>Тёмная тема включена.</p></div><div class='page-card'><b>История чатов</b><p>Разговоры сохраняются в памяти браузера на этом устройстве.</p><button id='clearHistory' style='background:#a74655;color:white;border:0;border-radius:9px;padding:11px'>Очистить историю</button></div></div>";
+ content.innerHTML="<div class='page'><h2>Настройки LIGHT BYTE</h2><p>Настройки интерфейса и приложения.</p><div class='page-card'><b>Тема</b><p>Тёмная тема включена.</p></div><div class='page-card'><b>История чатов</b><p>Разговоры сохраняются в памяти браузера на этом устройстве.</p><button id='clearHistory' style='background:#a74655;color:white;border:0;border-radius:9px;padding:11px'>Очистить историю</button></div></div>";
  document.getElementById("clearHistory").onclick=()=>{if(confirm("Удалить всю историю чатов?")){chats=[];save();newChat();}};
 };
 send.onclick=sendMessage;
