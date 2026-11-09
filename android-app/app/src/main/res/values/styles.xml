@@ -1,0 +1,11 @@
+<resources>
+    <style name="Theme.LightByte" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">#FF8A50</item>
+        <item name="colorOnPrimary">#271300</item>
+        <item name="colorSecondary">#D6C2B8</item>
+        <item name="android:statusBarColor">#111318</item>
+        <item name="android:navigationBarColor">#111318</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">#111318</item>
+    </style>
+</resources>
