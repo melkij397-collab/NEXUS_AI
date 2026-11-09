@@ -96,6 +96,7 @@ button{cursor:pointer}
 <div><b>LIGHT BYTE</b><small>LIGHT BYTE AI · Персональный ИИ</small></div>
 </div>
 </aside>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <main class="main">
 <div class="topbar">
@@ -119,6 +120,8 @@ const input=document.getElementById("message");
 const send=document.getElementById("send");
 const historyList=document.getElementById("historyList");
 const sidebar=document.getElementById("sidebar");
+const sidebarOverlay=document.getElementById("sidebarOverlay");
+function closeSidebar(){sidebar.classList.remove("open");sidebarOverlay.classList.remove("active");}
 let chats=JSON.parse(localStorage.getItem("flint_chats")||"[]");
 let currentId=null;
 let history=[];
@@ -128,7 +131,7 @@ function save(){localStorage.setItem("flint_chats",JSON.stringify(chats))}
 function newChat(){
  currentId=null;history=[];
  document.getElementById("topTitle").textContent="Новый чат";
- showWelcome();renderHistory();showChatPage();sidebar.classList.remove("open");
+ showWelcome();renderHistory();showChatPage();closeSidebar();
 }
 function showChatPage(){
  document.querySelectorAll(".menu-btn").forEach(b=>b.classList.toggle("active",b.dataset.page==="chat"));
@@ -155,7 +158,7 @@ function openChat(id){
  const c=chats.find(x=>x.id===id);if(!c)return;
  currentId=id;history=c.messages.map(m=>({...m}));
  document.getElementById("topTitle").textContent=c.title;
- showChatPage();renderMessages();renderHistory();sidebar.classList.remove("open");
+ showChatPage();renderMessages();renderHistory();closeSidebar();
 }
 function renderMessages(){
  content.innerHTML='<div class="messages" id="messages"></div>';
@@ -316,10 +319,11 @@ function page(name){
  }else if(name==="library"){
   p.innerHTML="<h2>Библиотека</h2><p>Место для материалов и полезной информации.</p><div class='page-card'>▤　Библиотека пока пуста.</div>";
  }
- sidebar.classList.remove("open");
+ closeSidebar();
 }
 document.getElementById("newChat").onclick=newChat;
-document.getElementById("menuToggle").onclick=()=>sidebar.classList.toggle("open");
+document.getElementById("menuToggle").onclick=()=>{sidebar.classList.toggle("open");sidebarOverlay.classList.toggle("active",sidebar.classList.contains("open"));};
+sidebarOverlay.onclick=closeSidebar;
 document.querySelectorAll(".menu-btn").forEach(b=>b.onclick=()=>{if(b.dataset.page==="chat")newChat();else page(b.dataset.page)});
 document.getElementById("settingsBtn").onclick=()=>{
  document.getElementById("composerWrap").style.display="none";

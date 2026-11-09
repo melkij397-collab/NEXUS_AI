@@ -122,3 +122,15 @@ button{transition:background .2s,border-color .2s}
 .composer:focus-within{border-color:#ff7900}
 #send{background:#ff7900;color:#111}
 #send:hover{background:#ff9a36}
+
+.sidebar-overlay{display:none}
+@media(max-width:700px){
+  .sidebar-overlay.active{
+    display:block;
+    position:fixed;
+    inset:0;
+    z-index:4;
+    background:rgba(0,0,0,.58);
+  }
+  .sidebar{z-index:5}
+}
