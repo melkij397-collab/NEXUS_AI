@@ -4,6 +4,8 @@
     <application
         android:allowBackup="true"
         android:label="LIGHT BYTE"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/Theme.LightByte"
         android:usesCleartextTraffic="false">
 
