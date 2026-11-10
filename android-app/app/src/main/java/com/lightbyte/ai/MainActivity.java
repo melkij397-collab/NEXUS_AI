@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
+import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
@@ -43,7 +44,25 @@ public class MainActivity extends AppCompatActivity {
         );
 
         webView.setBackgroundColor(Color.rgb(16,16,16));
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onReceivedError(WebView view,
+                    android.webkit.WebResourceRequest request,
+                    android.webkit.WebResourceError error) {
+                Log.e("NEXUS_WEB", "LOAD ERROR: "
+                    + request.getUrl() + " | "
+                    + error.getDescription());
+            }
+
+            @Override
+            public void onReceivedHttpError(WebView view,
+                    android.webkit.WebResourceRequest request,
+                    android.webkit.WebResourceResponse response) {
+                Log.e("NEXUS_WEB", "HTTP ERROR: "
+                    + response.getStatusCode() + " | "
+                    + request.getUrl());
+            }
+        });
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override

@@ -15,7 +15,7 @@ from core.emergency_shield import emergency_shield
 load_guard.on_saturation = emergency_shield.activate
 
 app = Flask(__name__, static_folder=".")
-app.config["MAX_CONTENT_LENGTH"] = 32 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 64 * 1024
 limiter = Limiter(
     key_func=get_remote_address,
     app=app,
@@ -79,7 +79,7 @@ def chat():
     if not isinstance(user_message, str) or not user_message.strip():
         return jsonify({"error": "Пустое сообщение"}), 400
 
-    if len(user_message) > 10000:
+    if len(user_message) > 12000:
         return jsonify({"error": "Сообщение слишком длинное"}), 413
 
     if "user_id" not in session:
@@ -88,7 +88,11 @@ def chat():
     session.permanent = True
 
     try:
-        nexus = NexusBrain(session["user_id"])
+        chat_id = data.get("chat_id", "default")
+        if not isinstance(chat_id, str) or not chat_id.isalnum() or len(chat_id) > 80:
+            return jsonify({"error": "Некорректный ID чата"}), 400
+
+        nexus = NexusBrain(session["user_id"], chat_id, data.get("timezone", "UTC"))
         result = nexus.process(user_message)
 
         return jsonify({
@@ -125,14 +129,18 @@ def chat_stream():
     if not isinstance(user_message, str) or not user_message.strip():
         return jsonify({"error": "Пустое сообщение"}), 400
 
-    if len(user_message) > 10000:
+    if len(user_message) > 12000:
         return jsonify({"error": "Сообщение слишком длинное"}), 413
 
     if "user_id" not in session:
         session["user_id"] = secrets.token_hex(24)
 
     session.permanent = True
-    nexus = NexusBrain(session["user_id"])
+    chat_id = data.get("chat_id", "default")
+    if not isinstance(chat_id, str) or not chat_id.isalnum() or len(chat_id) > 80:
+        return jsonify({"error": "Некорректный ID чата"}), 400
+
+    nexus = NexusBrain(session["user_id"], chat_id, data.get("timezone", "UTC"))
 
     def generate():
         import json

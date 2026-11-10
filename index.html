@@ -280,7 +280,7 @@ async function sendMessage(){
   const response=await fetch("/api/chat/stream",{
    method:"POST",
    headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({messages:history})
+   body:JSON.stringify({chat_id:currentId,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,messages:[{role:"user",content:text}]})
   });
 
   if(!response.ok){
