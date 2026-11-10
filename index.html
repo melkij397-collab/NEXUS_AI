@@ -74,6 +74,15 @@ button{cursor:pointer}
 .suggestions{grid-template-columns:1fr}
 .topbar{padding:0 12px}
 }
+
+.chat-row{display:flex;align-items:center;gap:3px;margin:3px 0;position:relative}
+.chat-row .chat-item{flex:1;min-width:0}
+.chat-more{background:transparent;border:0;color:#aaa;font-size:21px;border-radius:8px;padding:5px 9px}
+.chat-more:hover{background:var(--panel2);color:white}
+.chat-popup{position:absolute;right:3px;top:36px;z-index:20;width:210px;padding:6px;background:#252638;border:1px solid #41435a;border-radius:12px;box-shadow:0 12px 35px #0009}
+.chat-popup button{display:block;width:100%;padding:10px;text-align:left;color:#eee;background:transparent;border:0;border-radius:8px;font-size:13px}
+.chat-popup button:hover{background:#393a50}
+.chat-popup button.danger{color:#ff858e}
 </style>
 <link rel="stylesheet" href="/nexus.css">
 </head>
@@ -149,11 +158,50 @@ function showWelcome(){
 }
 function renderHistory(){
  historyList.innerHTML="";
- chats.slice().reverse().forEach(c=>{
-  const el=document.createElement("div");el.className="chat-item"+(c.id===currentId?" selected":"");el.textContent=c.title;
-  el.onclick=()=>openChat(c.id);historyList.appendChild(el);
+ chats.filter(c=>!c.archived)
+ .slice().sort((a,b)=>Number(!!b.pinned)-Number(!!a.pinned))
+ .forEach(c=>{
+  const row=document.createElement("div");
+  row.className="chat-row";
+  const el=document.createElement("div");
+  el.className="chat-item"+(c.id===currentId?" selected":"");
+  el.textContent=(c.pinned?"📌 ":"")+c.title;
+  el.onclick=()=>openChat(c.id);
+  const more=document.createElement("button");
+  more.className="chat-more";
+  more.textContent="⋯";
+  more.onclick=e=>{
+   e.stopPropagation();
+   document.querySelectorAll(".chat-popup").forEach(x=>x.remove());
+   const menu=document.createElement("div");
+   menu.className="chat-popup";
+   [["Закрепить","pin"],["Переименовать","rename"],["Добавить в проект","project"],["Архивировать","archive"],["Удалить","delete"]].forEach(([label,action])=>{
+    const btn=document.createElement("button");
+    btn.textContent=action==="pin"&&c.pinned?"Открепить":label;
+    if(action==="delete")btn.className="danger";
+    btn.onclick=ev=>{
+     ev.stopPropagation();
+     menu.remove();
+     if(action==="pin")c.pinned=!c.pinned;
+     if(action==="rename"){const n=prompt("Новое название чата:",c.title);if(n&&n.trim())c.title=n.trim();}
+     if(action==="project"){const n=prompt("Название проекта:");if(n&&n.trim())c.project=n.trim();}
+     if(action==="archive")c.archived=true;
+     if(action==="delete"){
+      if(!confirm("Удалить этот чат?"))return;
+      chats=chats.filter(x=>x.id!==c.id);
+      if(currentId===c.id){currentId=null;history=[];showWelcome();}
+     }
+     save();renderHistory();
+    };
+    menu.appendChild(btn);
+   });
+   row.appendChild(menu);
+  };
+  row.append(el,more);
+  historyList.appendChild(row);
  });
 }
+document.addEventListener("click",()=>document.querySelectorAll(".chat-popup").forEach(x=>x.remove()));
 function openChat(id){
  const c=chats.find(x=>x.id===id);if(!c)return;
  currentId=id;history=c.messages.map(m=>({...m}));
